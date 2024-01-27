@@ -2,14 +2,14 @@ import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/user';
 
-export async function register(req: Request, res: Response): Promise<void> {
+export function register(req: Request, res: Response): void {
 	const { firstname, lastname, email, password } = req.body;
 
-	if (email === undefined) res.status(400).send({ msg: 'El email es obligatorio' });
-	if (password === undefined) res.status(400).send({ msg: 'La contraseña es obligatoria' });
+	if (email === undefined) res.status(400).send({ msg: 'Email is required' });
+	if (password === undefined) res.status(400).send({ msg: 'Pass is required' });
 
 	const salt = bcrypt.genSaltSync(10);
-	const hashPassword = bcrypt.hashSync(password, salt);
+	const hashPassword = bcrypt.hashSync(password as string, salt);
 
 	const user = new User({
 		firstname,
@@ -21,9 +21,9 @@ export async function register(req: Request, res: Response): Promise<void> {
 	});
 
 	try {
-		const userStorage = await user.save();
+		const userStorage = user.save();
 		res.status(200).send(userStorage);
 	} catch (error) {
-		res.status(400).send({ msg: 'El usuario ya existe' });
+		res.status(400).send({ msg: 'User already exists' });
 	}
 }

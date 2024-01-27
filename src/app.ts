@@ -1,20 +1,20 @@
-import express from 'express'
-import cors from 'cors'
-import dotenv from 'dotenv'
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-import authRoutes from './router/auth'
+import authRoutes from './router/auth';
 
-dotenv.config()
+dotenv.config();
 
-const API_VERSION = process.env.API_VERSION
+const API_VERSION = process.env.API_VERSION;
 
-const app = express()
+const app = express();
 
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-app.use(express.static('uploads'))
-app.use(cors())
+app.use(express.static('uploads'));
+app.use(cors());
 
-app.use(`/api/${API_VERSION}`, authRoutes)
-export default app
+app.use(`/api/${API_VERSION}`, authRoutes);
+export default app;

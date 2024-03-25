@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
 import { sign, verify, type JwtPayload } from 'jsonwebtoken';
 import { type IRegisteredUser } from '../types/IUser';
+
+dotenv.config();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -24,7 +27,7 @@ export function createRefreshToken(user: IRegisteredUser): string {
 	expToken.setMonth(expToken.getMonth() + 1);
 
 	const payload = {
-		token_type: 'access',
+		token_type: 'refresh',
 		id: user._id,
 		email: user.email,
 		iat: Date.now(),

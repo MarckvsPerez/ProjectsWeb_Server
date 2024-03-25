@@ -1,10 +1,10 @@
 import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 import User from '../models/user';
-import { createAccesToken, createRefreshToken } from '../utils/jwt';
+import { createAccesToken, createRefreshToken, decodeToken } from '../utils/jwt';
 import { type IRegisteredUser } from '../types/IUser';
 
-export function register(req: Request, res: Response): void {
+export async function register(req: Request, res: Response): Promise<void> {
 	const { firstname, lastname, email, password } = req.body;
 
 	if (email === undefined) {
@@ -28,7 +28,7 @@ export function register(req: Request, res: Response): void {
 			role: 'user',
 			active: false,
 		});
-		void user.save();
+		await user.save();
 		res.status(200).send(user);
 	} catch (error: any) {
 		if (error.code === 11000) {
@@ -40,7 +40,7 @@ export function register(req: Request, res: Response): void {
 	}
 }
 
-export function login(req: Request, res: Response): void {
+export async function login(req: Request, res: Response): Promise<void> {
 	const { email, password }: { email: string; password: string } = req.body;
 
 	if (email === undefined) {
@@ -54,30 +54,51 @@ export function login(req: Request, res: Response): void {
 	const emailLowerCase = email.toLowerCase();
 
 	try {
-		void handleLogin(emailLowerCase, password, res);
+		const userStore: IRegisteredUser | null = await User.findOne({ email: emailLowerCase });
+
+		if (userStore === null) {
+			res.status(400).send({ msg: 'Usuario no encontrado' });
+			return;
+		}
+
+		const check = await bcrypt.compare(password, userStore.password);
+		if (!check) {
+			res.status(401).send({ msg: 'Contraseña incorrecta' });
+			return;
+		}
+
+		if (!userStore.active) {
+			res.status(402).send({ msg: 'Usuario no activo' });
+			return;
+		}
+
+		res.status(200).send({ msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
 	} catch (error) {
 		res.status(500).send({ msg: 'Error del servidor' });
 	}
 }
 
-async function handleLogin(email: string, password: string, res: Response): Promise<void> {
-	const userStore: IRegisteredUser | null = await User.findOne({ email });
+export async function refreshAccessToken(req: Request, res: Response): Promise<void> {
+	const { token }: { token: string | null } = req.body;
 
-	if (userStore === null) {
-		res.status(400).send({ msg: 'Usuario no encontrado' });
-		return;
+	if (token !== null) {
+		const decodedToken = decodeToken(token);
+
+		if (decodedToken !== null && typeof decodedToken === 'object') {
+			const id: string = decodedToken.id;
+			try {
+				const userStore: IRegisteredUser | null = await User.findOne({ _id: id });
+
+				if (userStore === null) {
+					res.status(400).send({ msg: 'Usuario no encontrado' });
+				} else {
+					res.status(200).send({ msg: 'Ok', accessToken: createAccesToken(userStore) });
+				}
+			} catch (error) {
+				res.status(500).send({ msg: 'Error del servidor' });
+			}
+		}
+	} else {
+		res.status(400).send({ msg: 'Token requerido' });
 	}
-
-	const check = await bcrypt.compare(password, userStore.password);
-	if (!check) {
-		res.status(401).send({ msg: 'Contraseña incorrecta' });
-		return;
-	}
-
-	if (!userStore.active) {
-		res.status(402).send({ msg: 'Usuario no activo' });
-		return;
-	}
-
-	res.status(200).send({ msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
 }

@@ -19,8 +19,8 @@ export async function register(req: Request, res: Response): Promise<void> {
 
 	try {
 		const user = new User({
-			firstname,
-			lastname,
+			firstName: firstname,
+			lastName: lastname,
 			email: email.toLowerCase(),
 			password: hashPassword,
 			role: 'user',

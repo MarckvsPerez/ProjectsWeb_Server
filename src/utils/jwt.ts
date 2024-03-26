@@ -5,8 +5,8 @@ import { type IRegisteredUser } from '../types/IUser';
 dotenv.config();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
-const JWT_ACCES_HOUR = process.env.JWT_ACCES_HOUR;
-const JWT_REFRESH_MONTH = process.env.JWT_REFRESH_MONTH;
+const JWT_ACCES_HOUR = Number(process.env.JWT_ACCES_HOUR);
+const JWT_REFRESH_MONTH = Number(process.env.JWT_REFRESH_MONTH);
 
 export function createAccesToken(user: IRegisteredUser): string {
 	const expToken = new Date();

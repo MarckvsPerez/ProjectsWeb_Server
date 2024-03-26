@@ -5,10 +5,12 @@ import { type IRegisteredUser } from '../types/IUser';
 dotenv.config();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const JWT_ACCES_HOUR = process.env.JWT_ACCES_HOUR;
+const JWT_REFRESH_MONTH = process.env.JWT_REFRESH_MONTH;
 
 export function createAccesToken(user: IRegisteredUser): string {
 	const expToken = new Date();
-	expToken.setHours(expToken.getHours() + 16);
+	expToken.setHours(expToken.getHours() + Number(JWT_ACCES_HOUR));
 
 	const payload = {
 		token_type: 'access',
@@ -24,7 +26,7 @@ export function createAccesToken(user: IRegisteredUser): string {
 
 export function createRefreshToken(user: IRegisteredUser): string {
 	const expToken = new Date();
-	expToken.setMonth(expToken.getMonth() + 1);
+	expToken.setMonth(expToken.getMonth() + Number(JWT_REFRESH_MONTH));
 
 	const payload = {
 		token_type: 'refresh',

@@ -8,11 +8,11 @@ export async function register(req: Request, res: Response): Promise<void> {
 	const { firstname, lastname, email, password } = req.body;
 
 	if (email === undefined) {
-		res.status(400).send({ msg: 'Email is required' });
+		res.status(400).send({ success: false, msg: 'Email is required' });
 		return;
 	}
 	if (password === undefined) {
-		res.status(400).send({ msg: 'Pass is required' });
+		res.status(400).send({ success: false, msg: 'Pass is required' });
 		return;
 	}
 
@@ -29,13 +29,13 @@ export async function register(req: Request, res: Response): Promise<void> {
 			active: false,
 		});
 		await user.save();
-		res.status(200).send(user);
+		res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
 	} catch (error: any) {
 		if (error.code === 11000) {
-			res.status(400).send({ msg: 'El usuario ya existe' });
+			res.status(400).send({ success: false, msg: 'El usuario ya existe' });
 		} else {
 			console.error('Error while saving user:', error);
-			res.status(500).send({ msg: 'Error interno del servidor' });
+			res.status(500).send({ success: false, msg: 'Error interno del servidor' });
 		}
 	}
 }
@@ -44,11 +44,11 @@ export async function login(req: Request, res: Response): Promise<void> {
 	const { email, password }: { email: string; password: string } = req.body;
 
 	if (email === undefined) {
-		res.status(400).send({ msg: 'Email is required' });
+		res.status(400).send({ success: false, msg: 'Email is required' });
 		return;
 	}
 	if (password === undefined) {
-		res.status(400).send({ msg: 'Pass is required' });
+		res.status(400).send({ success: false, msg: 'Pass is required' });
 	}
 
 	const emailLowerCase = email.toLowerCase();
@@ -57,24 +57,26 @@ export async function login(req: Request, res: Response): Promise<void> {
 		const userStore: IRegisteredUser | null = await User.findOne({ email: emailLowerCase });
 
 		if (userStore === null) {
-			res.status(400).send({ msg: 'Usuario no encontrado' });
+			res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
 			return;
 		}
 
 		const check = await bcrypt.compare(password, userStore.password);
 		if (!check) {
-			res.status(401).send({ msg: 'Contraseña incorrecta' });
+			res.status(401).send({ success: false, msg: 'Contraseña incorrecta' });
 			return;
 		}
 
 		if (!userStore.active) {
-			res.status(402).send({ msg: 'Usuario no activo' });
+			res.status(402).send({ success: false, msg: 'Usuario no activo' });
 			return;
 		}
 
-		res.status(200).send({ msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
+		res
+			.status(200)
+			.send({ success: true, msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
 	} catch (error) {
-		res.status(500).send({ msg: 'Error del servidor' });
+		res.status(500).send({ success: false, msg: 'Error del servidor' });
 	}
 }
 
@@ -90,15 +92,15 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
 				const userStore: IRegisteredUser | null = await User.findOne({ _id: id });
 
 				if (userStore === null) {
-					res.status(400).send({ msg: 'Usuario no encontrado' });
+					res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
 				} else {
-					res.status(200).send({ msg: 'Ok', accessToken: createAccesToken(userStore) });
+					res.status(200).send({ success: true, msg: 'Ok', accessToken: createAccesToken(userStore) });
 				}
 			} catch (error) {
-				res.status(500).send({ msg: 'Error del servidor' });
+				res.status(500).send({ success: false, msg: 'Error del servidor' });
 			}
 		}
 	} else {
-		res.status(400).send({ msg: 'Token requerido' });
+		res.status(400).send({ success: false, msg: 'Token requerido' });
 	}
 }

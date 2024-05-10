@@ -76,7 +76,11 @@ export async function login(req: Request, res: Response): Promise<void> {
 			.status(200)
 			.send({ success: true, msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
 	} catch (error) {
-		res.status(500).send({ success: false, msg: 'Error del servidor' });
+		if (error instanceof Error) {
+			console.error(error.message);
+			res.status(500).send({ success: false, msg: error.message });
+		}
+		res.status(500).send({ success: false, msg: 'Unknown error' });
 	}
 }
 

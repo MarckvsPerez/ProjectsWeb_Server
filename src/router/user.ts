@@ -9,4 +9,8 @@ router.get('/getme', [md_auth.asureAuth], (req: Request, res: Response, next: Ne
 	UserControlelr.getMe(req, res).catch(next);
 });
 
+router.get('/users', [md_auth.asureAuth], (req: Request, res: Response, next: NextFunction) => {
+	UserControlelr.getUsers(req, res).catch(next);
+});
+
 export default router;

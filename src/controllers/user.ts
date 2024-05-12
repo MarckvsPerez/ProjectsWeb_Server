@@ -1,6 +1,9 @@
 import { type Response } from 'express';
-import { type AuthRequest } from '../types/Request';
+import bcrypt from 'bcrypt';
+
 import User from '../models/user';
+
+import { type AuthRequest } from '../types/Request';
 
 export async function getMe(req: AuthRequest, res: Response): Promise<void> {
 	if (req.user !== undefined) {
@@ -39,5 +42,29 @@ export async function getUsers(req: AuthRequest, res: Response): Promise<void> {
 			res.status(500).send({ success: false, msg: error.message });
 		}
 		res.status(500).send({ success: false, msg: 'Unknown error' });
+	}
+}
+
+export async function createUser(req: AuthRequest, res: Response): Promise<void> {
+	const { password } = req.body;
+
+	const user = new User({ ...req.body, active: false });
+	const salt = bcrypt.genSaltSync(10);
+	const hashPassword = bcrypt.hashSync(password as string, salt);
+
+	try {
+		user.password = hashPassword;
+		if (req.file !== undefined) {
+			console.log('File uploaded:', req.file.originalname);
+		}
+		await user.save();
+		res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+	} catch (error: any) {
+		if (error.code === 11000) {
+			res.status(400).send({ success: false, msg: 'El usuario ya existe' });
+		} else {
+			console.error('Error while saving user:', error);
+			res.status(500).send({ success: false, msg: 'Error interno del servidor' });
+		}
 	}
 }

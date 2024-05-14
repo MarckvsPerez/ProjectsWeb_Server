@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/user';
 
 import { type AuthRequest } from '../types/Request';
+import { getFilePath } from '../utils/image';
 
 export async function getMe(req: AuthRequest, res: Response): Promise<void> {
 	if (req.user !== undefined) {
@@ -55,7 +56,8 @@ export async function createUser(req: AuthRequest, res: Response): Promise<void>
 	try {
 		user.password = hashPassword;
 		if (req.file !== undefined) {
-			console.log('File uploaded:', req.file.originalname);
+			const filePath = getFilePath(req.file);
+			user.avatar = filePath;
 		}
 		await user.save();
 		res.status(200).send({ success: true, msg: 'Usuario creado con exito' });

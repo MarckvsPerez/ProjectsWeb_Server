@@ -1,7 +1,9 @@
 import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
+
 import User from '../models/user';
 import { createAccesToken, createRefreshToken, decodeToken } from '../utils/jwt';
+
 import { type IRegisteredUser } from '../types/IUser';
 
 export async function register(req: Request, res: Response): Promise<void> {
@@ -28,14 +30,16 @@ export async function register(req: Request, res: Response): Promise<void> {
 			role: 'user',
 			active: false,
 		});
-		await user.save();
-		res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
-	} catch (error: any) {
-		if (error.code === 11000) {
-			res.status(400).send({ success: false, msg: 'El usuario ya existe' });
+		const response = await user.save();
+
+		if (response === null) res.status(404).send({ success: false, msg: 'Users not created' });
+		else res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(error.message);
+			res.status(500).send({ success: false, msg: error.message });
 		} else {
-			console.error('Error while saving user:', error);
-			res.status(500).send({ success: false, msg: 'Error interno del servidor' });
+			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
 	}
 }
@@ -57,7 +61,7 @@ export async function login(req: Request, res: Response): Promise<void> {
 		const userStore: IRegisteredUser | null = await User.findOne({ email: emailLowerCase });
 
 		if (userStore === null) {
-			res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
+			res.status(404).send({ success: false, msg: 'Usuario no encontrado' });
 			return;
 		}
 
@@ -79,8 +83,9 @@ export async function login(req: Request, res: Response): Promise<void> {
 		if (error instanceof Error) {
 			console.error(error.message);
 			res.status(500).send({ success: false, msg: error.message });
+		} else {
+			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
-		res.status(500).send({ success: false, msg: 'Unknown error' });
 	}
 }
 
@@ -95,13 +100,15 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
 			try {
 				const userStore: IRegisteredUser | null = await User.findOne({ _id: id });
 
-				if (userStore === null) {
-					res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
-				} else {
-					res.status(200).send({ success: true, msg: 'Ok', accessToken: createAccesToken(userStore) });
-				}
+				if (userStore === null) res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
+				else res.status(200).send({ success: true, msg: 'Ok', accessToken: createAccesToken(userStore) });
 			} catch (error) {
-				res.status(500).send({ success: false, msg: 'Error del servidor' });
+				if (error instanceof Error) {
+					console.error(error.message);
+					res.status(500).send({ success: false, msg: error.message });
+				} else {
+					res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
+				}
 			}
 		}
 	} else {

@@ -13,14 +13,15 @@ export async function getMe(req: AuthRequest, res: Response): Promise<void> {
 
 		try {
 			const response = await User.findById(id);
-			if (response === null) res.status(400).send({ success: false, msg: 'User not found' });
-			res.status(200).send({ success: true, msg: 'ok', response });
+			if (response === null) res.status(404).send({ success: false, msg: 'User not found' });
+			else res.status(200).send({ success: true, msg: 'ok', response });
 		} catch (error) {
 			if (error instanceof Error) {
 				console.error(error.message);
 				res.status(500).send({ success: false, msg: error.message });
+			} else {
+				res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 			}
-			res.status(500).send({ success: false, msg: 'Unknown error' });
 		}
 	} else {
 		res.status(400).send({ success: false, msg: "Server error: User don't send" });
@@ -33,17 +34,22 @@ export async function getUsers(req: AuthRequest, res: Response): Promise<void> {
 	try {
 		if (active === undefined) {
 			const response = await User.find();
-			res.status(200).send({ msg: 'Ok', data: response });
+
+			if (response === null) res.status(404).send({ success: false, msg: 'Users not found' });
+			else res.status(200).send({ success: true, msg: 'ok', response });
 		} else {
 			const response = await User.find({ active });
-			res.status(200).send({ msg: 'Ok', data: response });
+
+			if (response === null) res.status(404).send({ success: false, msg: 'Users not found' });
+			else res.status(200).send({ success: true, msg: 'ok', response });
 		}
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error(error.message);
 			res.status(500).send({ success: false, msg: error.message });
+		} else {
+			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
-		res.status(500).send({ success: false, msg: 'Unknown error' });
 	}
 }
 
@@ -60,21 +66,21 @@ export async function createUser(req: AuthRequest, res: Response): Promise<void>
 			const filePath = getFilePath(req.file);
 			user.avatar = filePath;
 		}
-		await user.save();
-		res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
-	} catch (error: any) {
+		const response = await user.save();
+
+		if (response === null) res.status(404).send({ success: false, msg: 'Users not created' });
+		else res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+	} catch (error) {
 		if (req.file !== undefined) {
 			const filePath = getFilePath(req.file);
 			const fullPath = 'src/uploads/' + filePath;
-			if (fs.existsSync(fullPath)) {
-				fs.unlinkSync(fullPath);
-			}
+			if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
 		}
-		if (error.code === 11000) {
-			res.status(400).send({ success: false, msg: 'El usuario ya existe' });
+		if (error instanceof Error) {
+			console.error(error.message);
+			res.status(500).send({ success: false, msg: error.message });
 		} else {
-			console.error('Error while saving user:', error);
-			res.status(500).send({ success: false, msg: 'Error interno del servidor' });
+			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
 	}
 }
@@ -95,31 +101,33 @@ export async function updateUser(req: AuthRequest, res: Response): Promise<void>
 
 			if (user !== null) {
 				const fullOldPath = 'src/uploads/' + user.avatar;
-				if (fs.existsSync(fullOldPath)) {
-					fs.unlinkSync(fullOldPath);
-				}
+				if (fs.existsSync(fullOldPath)) fs.unlinkSync(fullOldPath);
+
 				const filePath = getFilePath(req.file);
 				userData.avatar = filePath;
 			} else {
 				const filePath = getFilePath(req.file);
 				const fullPath = 'src/uploads/' + filePath;
-				if (fs.existsSync(fullPath)) {
-					fs.unlinkSync(fullPath);
-				}
+				if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
 			}
 		}
-		const result = await User.findByIdAndUpdate({ _id: id }, userData);
-		if (result !== null) res.status(200).send({ success: true, msg: 'Usuario actualizado con exito' });
-		else res.status(404).send({ success: false, msg: 'User not found' });
-	} catch (error: any) {
-		console.error('Error while saving user:', error);
-		res.status(500).send({ success: false, msg: error });
+
+		const response = await User.findByIdAndUpdate({ _id: id }, userData);
+
+		if (response === null) res.status(404).send({ success: false, msg: 'User not found' });
+		else res.status(200).send({ success: true, msg: 'User updated succesfully' });
+	} catch (error) {
 		if (req.file !== undefined) {
 			const filePath = getFilePath(req.file);
 			const fullPath = 'src/uploads/' + filePath;
-			if (fs.existsSync(fullPath)) {
-				fs.unlinkSync(fullPath);
-			}
+			if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+		}
+
+		if (error instanceof Error) {
+			console.error(error.message);
+			res.status(500).send({ success: false, msg: error.message });
+		} else {
+			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
 	}
 }

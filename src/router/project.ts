@@ -14,7 +14,7 @@ router.post(
 	[
 		md_auth.asureAuth,
 		md_upload.uploadMiniature.single('miniature'),
-		md_fields.validateFields(projectsFields.createProject),
+		md_fields.validateFields(projectsFields.createFields),
 	],
 	(req: Request, res: Response, next: NextFunction) => {
 		ProjectController.createProject(req, res).catch(next);

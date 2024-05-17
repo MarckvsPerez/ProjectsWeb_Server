@@ -1,26 +1,34 @@
 import { type ValidationChain, body } from 'express-validator';
 
-export const createFields: ValidationChain[] = [
-	body('title')
+export const registerFields: ValidationChain[] = [
+	body('firstname')
 		.notEmpty()
 		.withMessage('⛔ The field cannot be empty.')
 		.isString()
-		.withMessage('⛔ Title must be a string'),
+		.withMessage('⛔ Firstname must be a string'),
 
-	body('content')
+	body('lastname')
 		.notEmpty()
 		.withMessage('⛔ The field cannot be empty.')
 		.isString()
-		.withMessage('⛔ Content must be a string'),
+		.withMessage('⛔ Lastname must be a string'),
 
-	body('path')
+	body('email')
 		.notEmpty()
 		.withMessage('⛔ The field cannot be empty.')
+		.isEmail()
+		.withMessage('⛔ Please enter a valid email address.'),
+
+	body('password')
+		.notEmpty()
+		.withMessage('⛔ The password field cannot be empty.')
 		.isString()
-		.withMessage('⛔ Path must be a string'),
+		.withMessage('⛔ Password must be a valid string.')
+		.isLength({ min: 8 })
+		.withMessage('⛔ Password must be at least 8 characters long.'),
 
 	body().custom((value: Record<string, string>) => {
-		const allowedFields = ['title', 'path', 'content'];
+		const allowedFields = ['firstname', 'lastname', 'email', 'password'];
 		const invalidFields = Object.keys(value).filter((key) => !allowedFields.includes(key));
 
 		if (invalidFields.length > 0) {

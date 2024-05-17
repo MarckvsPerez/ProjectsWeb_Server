@@ -9,15 +9,6 @@ import { type IRegisteredUser } from '../types/IUser';
 export async function register(req: Request, res: Response): Promise<void> {
 	const { firstname, lastname, email, password } = req.body;
 
-	if (email === undefined) {
-		res.status(400).send({ success: false, msg: 'Email is required' });
-		return;
-	}
-	if (password === undefined) {
-		res.status(400).send({ success: false, msg: 'Pass is required' });
-		return;
-	}
-
 	const salt = bcrypt.genSaltSync(10);
 	const hashPassword = bcrypt.hashSync(password as string, salt);
 
@@ -32,14 +23,14 @@ export async function register(req: Request, res: Response): Promise<void> {
 		});
 		const response = await user.save();
 
-		if (response === null) res.status(404).send({ success: false, msg: 'Users not created' });
-		else res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+		if (response === null) res.status(404).send({ success: false, msg: 'User not created' });
+		else res.status(200).send({ success: true, msg: 'User created succesfully', data: response });
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error(error.message);
 			res.status(500).send({ success: false, msg: error.message });
 		} else {
-			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
+			res.status(500).send({ success: false, msg: 'Internal server error' });
 		}
 	}
 }

@@ -4,9 +4,12 @@ import express, {
 	type NextFunction,
 } from 'express';
 
-import * as UserControlelr from '../controllers/user';
 import * as md_auth from '../middlewares/authenticated';
 import * as md_upload from '../middlewares/upload';
+import * as md_fields from '../middlewares/fields';
+
+import * as UserControlelr from '../controllers/user';
+import * as usersFields from '../validations/UsersFields';
 
 const router = express.Router();
 
@@ -28,7 +31,11 @@ router.get(
 
 router.post(
 	'/users',
-	[md_auth.asureAuth, md_upload.uploadAvatar.single('avatar')],
+	[
+		md_auth.asureAuth,
+		md_upload.uploadAvatar.single('avatar'),
+		md_fields.validateFields(usersFields.createFields),
+	],
 	(req: Request, res: Response, next: NextFunction) => {
 		UserControlelr.createUser(req, res).catch(next);
 	},
@@ -36,7 +43,11 @@ router.post(
 
 router.patch(
 	'/users/:id',
-	[md_auth.asureAuth, md_upload.uploadAvatar.single('avatar')],
+	[
+		md_auth.asureAuth,
+		md_upload.uploadAvatar.single('avatar'),
+		md_fields.validateFields(usersFields.updateFields),
+	],
 	(req: Request, res: Response, next: NextFunction) => {
 		UserControlelr.updateUser(req, res).catch(next);
 	},

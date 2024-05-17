@@ -82,8 +82,10 @@ export async function login(req: Request, res: Response): Promise<void> {
 		res.status(200).send({
 			success: true,
 			msg: 'Ok',
-			access: createAccesToken(userStore),
-			refresh: createRefreshToken(userStore),
+			data: {
+				access: createAccesToken(userStore),
+				refresh: createRefreshToken(userStore),
+			},
 		});
 	} catch (error) {
 		if (error instanceof Error) {

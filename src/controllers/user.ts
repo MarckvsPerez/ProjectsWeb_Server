@@ -17,7 +17,7 @@ export async function getMe(req: AuthRequest, res: Response): Promise<void> {
 			if (response === null) {
 				res.status(404).send({ success: false, msg: 'User not found' });
 			} else {
-				res.status(200).send({ success: true, msg: 'ok', response });
+				res.status(200).send({ success: true, msg: 'ok', data: response });
 			}
 		} catch (error) {
 			if (error instanceof Error) {
@@ -46,7 +46,7 @@ export async function getUsers(req: AuthRequest, res: Response): Promise<void> {
 			if (response === null) {
 				res.status(404).send({ success: false, msg: 'Users not found' });
 			} else {
-				res.status(200).send({ success: true, msg: 'ok', response });
+				res.status(200).send({ success: true, msg: 'ok', data: response });
 			}
 		} else {
 			const response = await User.find({ active });
@@ -54,7 +54,7 @@ export async function getUsers(req: AuthRequest, res: Response): Promise<void> {
 			if (response === null) {
 				res.status(404).send({ success: false, msg: 'Users not found' });
 			} else {
-				res.status(200).send({ success: true, msg: 'ok', response });
+				res.status(200).send({ success: true, msg: 'ok', data: response });
 			}
 		}
 	} catch (error) {
@@ -90,7 +90,11 @@ export async function createUser(
 		if (response === null) {
 			res.status(404).send({ success: false, msg: 'Users not created' });
 		} else {
-			res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+			res.status(200).send({
+				success: true,
+				msg: 'Usuario creado con exito',
+				data: response,
+			});
 		}
 	} catch (error) {
 		if (req.file !== undefined) {
@@ -144,7 +148,11 @@ export async function updateUser(
 		if (response === null) {
 			res.status(404).send({ success: false, msg: 'User not found' });
 		} else {
-			res.status(200).send({ success: true, msg: 'User updated succesfully' });
+			res.status(200).send({
+				success: true,
+				msg: 'User updated succesfully',
+				data: response,
+			});
 		}
 	} catch (error) {
 		if (req.file !== undefined) {

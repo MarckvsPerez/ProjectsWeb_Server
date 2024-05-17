@@ -7,13 +7,13 @@ import express, {
 import * as AuthController from '../controllers/auth';
 import * as md_fields from '../middlewares/fields';
 
-import { registerFields } from '../validations/AuthFields';
+import * as authFields from '../validations/AuthFields';
 
 const router = express.Router();
 
 router.post(
 	'/register',
-	[md_fields.validateFields(registerFields)],
+	[md_fields.validateFields(authFields.registerFields)],
 	(req: Request, res: Response, next: NextFunction) => {
 		AuthController.register(req, res).catch(next);
 	},
@@ -21,14 +21,18 @@ router.post(
 
 router.post(
 	'/login',
-	[md_fields.validateFields(registerFields)],
+	[md_fields.validateFields(authFields.loginFields)],
 	(req: Request, res: Response, next: NextFunction) => {
 		AuthController.login(req, res).catch(next);
 	},
 );
 
-router.post('/refresh', (req, res, next) => {
-	AuthController.refreshAccessToken(req, res).catch(next);
-});
+router.post(
+	'/refresh',
+	[md_fields.validateFields(authFields.refreshFields)],
+	(req: Request, res: Response, next: NextFunction) => {
+		AuthController.refreshAccessToken(req, res).catch(next);
+	},
+);
 
 export default router;

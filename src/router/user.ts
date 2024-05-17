@@ -16,7 +16,7 @@ router.get('/users', [md_auth.asureAuth], (req: Request, res: Response, next: Ne
 
 router.post(
 	'/users',
-	[md_auth.asureAuth, md_upload.upload.single('avatar')],
+	[md_auth.asureAuth, md_upload.uploadAvatar.single('avatar')],
 	(req: Request, res: Response, next: NextFunction) => {
 		UserControlelr.createUser(req, res).catch(next);
 	},
@@ -24,7 +24,7 @@ router.post(
 
 router.patch(
 	'/users/:id',
-	[md_auth.asureAuth, md_upload.upload.single('avatar')],
+	[md_auth.asureAuth, md_upload.uploadAvatar.single('avatar')],
 	(req: Request, res: Response, next: NextFunction) => {
 		UserControlelr.updateUser(req, res).catch(next);
 	},

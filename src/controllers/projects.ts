@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import Project from '../models/project';
 
 import { getFilePath } from '../utils/image';
@@ -14,8 +16,21 @@ export async function createProject(req: AuthRequest, res: Response): Promise<vo
 		project.miniature = filePath;
 	}
 
-	const response = await project.save();
-
-	if (response === null) res.status(404).send({ success: false, msg: 'Users not created' });
-	else res.status(200).send({ success: true, msg: 'Usuario creado con exito' });
+	try {
+		const response = await project.save();
+		if (response === null) res.status(404).send({ success: false, msg: 'Project creation failed' });
+		else res.status(200).send({ success: true, msg: 'Project created succesfully', data: response });
+	} catch (error) {
+		if (req.file !== undefined) {
+			const filePath = getFilePath(req.file);
+			const fullPath = 'src/uploads/' + filePath;
+			if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+		}
+		if (error instanceof Error) {
+			console.error(error.message);
+			res.status(500).send({ success: false, msg: error.message });
+		} else {
+			res.status(500).send({ success: false, msg: 'Internal server error' });
+		}
+	}
 }

@@ -1,6 +1,7 @@
 import { type Response } from 'express';
 import bcrypt from 'bcrypt';
 import fs from 'fs';
+
 import User from '../models/user';
 
 import { type AuthRequest } from '../types/Request';

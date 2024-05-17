@@ -2,9 +2,6 @@ export interface IProject {
 	title: string;
 	miniature: string;
 	content: string;
-	path: {
-		type: string;
-		unique: true;
-	};
+	path: string;
 	created_at: Date;
 }

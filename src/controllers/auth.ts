@@ -2,7 +2,11 @@ import { type Request, type Response } from 'express';
 import bcrypt from 'bcrypt';
 
 import User from '../models/user';
-import { createAccesToken, createRefreshToken, decodeToken } from '../utils/jwt';
+import {
+	createAccesToken,
+	createRefreshToken,
+	decodeToken,
+} from '../utils/jwt';
 
 import { type IRegisteredUser } from '../types/IUser';
 
@@ -23,8 +27,14 @@ export async function register(req: Request, res: Response): Promise<void> {
 		});
 		const response = await user.save();
 
-		if (response === null) res.status(404).send({ success: false, msg: 'User not created' });
-		else res.status(200).send({ success: true, msg: 'User created succesfully', data: response });
+		if (response === null)
+			res.status(404).send({ success: false, msg: 'User not created' });
+		else
+			res.status(200).send({
+				success: true,
+				msg: 'User created succesfully',
+				data: response,
+			});
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error(error.message);
@@ -49,7 +59,9 @@ export async function login(req: Request, res: Response): Promise<void> {
 	const emailLowerCase = email.toLowerCase();
 
 	try {
-		const userStore: IRegisteredUser | null = await User.findOne({ email: emailLowerCase });
+		const userStore: IRegisteredUser | null = await User.findOne({
+			email: emailLowerCase,
+		});
 
 		if (userStore === null) {
 			res.status(404).send({ success: false, msg: 'Usuario no encontrado' });
@@ -67,20 +79,28 @@ export async function login(req: Request, res: Response): Promise<void> {
 			return;
 		}
 
-		res
-			.status(200)
-			.send({ success: true, msg: 'Ok', access: createAccesToken(userStore), refresh: createRefreshToken(userStore) });
+		res.status(200).send({
+			success: true,
+			msg: 'Ok',
+			access: createAccesToken(userStore),
+			refresh: createRefreshToken(userStore),
+		});
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error(error.message);
 			res.status(500).send({ success: false, msg: error.message });
 		} else {
-			res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
+			res
+				.status(500)
+				.send({ success: false, msg: 'ExtendedError interno del servidor' });
 		}
 	}
 }
 
-export async function refreshAccessToken(req: Request, res: Response): Promise<void> {
+export async function refreshAccessToken(
+	req: Request,
+	res: Response,
+): Promise<void> {
 	const { token }: { token: string | null } = req.body;
 
 	if (token !== null) {
@@ -89,16 +109,29 @@ export async function refreshAccessToken(req: Request, res: Response): Promise<v
 		if (decodedToken !== null && typeof decodedToken === 'object') {
 			const id: string = decodedToken.id;
 			try {
-				const userStore: IRegisteredUser | null = await User.findOne({ _id: id });
+				const userStore: IRegisteredUser | null = await User.findOne({
+					_id: id,
+				});
 
-				if (userStore === null) res.status(400).send({ success: false, msg: 'Usuario no encontrado' });
-				else res.status(200).send({ success: true, msg: 'Ok', accessToken: createAccesToken(userStore) });
+				if (userStore === null)
+					res
+						.status(400)
+						.send({ success: false, msg: 'Usuario no encontrado' });
+				else
+					res.status(200).send({
+						success: true,
+						msg: 'Ok',
+						accessToken: createAccesToken(userStore),
+					});
 			} catch (error) {
 				if (error instanceof Error) {
 					console.error(error.message);
 					res.status(500).send({ success: false, msg: error.message });
 				} else {
-					res.status(500).send({ success: false, msg: 'ExtendedError interno del servidor' });
+					res.status(500).send({
+						success: false,
+						msg: 'ExtendedError interno del servidor',
+					});
 				}
 			}
 		}

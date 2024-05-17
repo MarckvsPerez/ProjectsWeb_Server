@@ -13,7 +13,9 @@ const API_VERSION = process.env.API_VERSION;
 
 void (async () => {
 	try {
-		await mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}`);
+		await mongoose.connect(
+			`mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}`,
+		);
 		app.listen(PORT, () => {
 			console.log(`http://${IP_SERVER}:${PORT}/api/${API_VERSION}`);
 		});

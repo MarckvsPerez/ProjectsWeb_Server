@@ -29,10 +29,14 @@ export const registerFields: ValidationChain[] = [
 
 	body().custom((value: Record<string, string>) => {
 		const allowedFields = ['firstname', 'lastname', 'email', 'password'];
-		const invalidFields = Object.keys(value).filter((key) => !allowedFields.includes(key));
+		const invalidFields = Object.keys(value).filter(
+			(key) => !allowedFields.includes(key),
+		);
 
 		if (invalidFields.length > 0) {
-			throw new Error(`⛔ The following fields are not allowed: ${invalidFields.join(', ')}`);
+			throw new Error(
+				`⛔ The following fields are not allowed: ${invalidFields.join(', ')}`,
+			);
 		}
 
 		return true;

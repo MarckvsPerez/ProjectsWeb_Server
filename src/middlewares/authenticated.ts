@@ -2,9 +2,15 @@ import { type AuthRequest } from '../types/Request';
 import { decodeToken } from '../utils/jwt';
 import { type Response, type RequestHandler, type NextFunction } from 'express';
 
-export const asureAuth: RequestHandler = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const asureAuth: RequestHandler = (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
 	if (req.headers.authorization === undefined) {
-		res.status(403).send({ msg: 'La petición no tiene la cabecera de autenticación' });
+		res
+			.status(403)
+			.send({ msg: 'La petición no tiene la cabecera de autenticación' });
 	} else {
 		const token: string = req.headers.authorization.replace('Bearer ', '');
 

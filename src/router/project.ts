@@ -1,4 +1,8 @@
-import express, { type Request, type Response, type NextFunction } from 'express';
+import express, {
+	type Request,
+	type Response,
+	type NextFunction,
+} from 'express';
 
 import * as md_auth from '../middlewares/authenticated';
 import * as md_upload from '../middlewares/upload';

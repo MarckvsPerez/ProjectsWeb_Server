@@ -25,4 +25,12 @@ router.post(
 	},
 );
 
+router.get(
+	'/',
+	[md_auth.asureAuth],
+	(req: Request, res: Response, next: NextFunction) => {
+		ProjectController.getProjects(req, res).catch(next);
+	},
+);
+
 export default router;

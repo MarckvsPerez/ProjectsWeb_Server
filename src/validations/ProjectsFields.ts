@@ -19,8 +19,16 @@ export const createFields: ValidationChain[] = [
 		.isString()
 		.withMessage('⛔ Path must be a string'),
 
+	body('stack')
+		.notEmpty()
+		.withMessage('⛔ The field cannot be empty.')
+		.isArray()
+		.withMessage('⛔ Path must be an array.')
+		.custom((array) => array.every((item: string) => typeof item === 'string'))
+		.withMessage('⛔ All elements of the array must be strings.'),
+
 	body().custom((value: Record<string, string>) => {
-		const allowedFields = ['title', 'path', 'content'];
+		const allowedFields = ['title', 'path', 'content', 'stack'];
 		const invalidFields = Object.keys(value).filter(
 			(key) => !allowedFields.includes(key),
 		);

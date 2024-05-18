@@ -44,3 +44,45 @@ export async function createProject(
 		}
 	}
 }
+
+export async function getProjects(
+	req: AuthRequest,
+	res: Response,
+): Promise<void> {
+	const {
+		page = 1,
+		limit = 100,
+		stack,
+	} = req.query as {
+		page?: string;
+		limit?: string;
+		stack?: string;
+	};
+
+	const query: { stack?: { $in: string[] } } = {};
+
+	if (stack !== undefined) {
+		const stackArray = stack.split(',');
+		query.stack = { $in: stackArray };
+	}
+
+	const options = {
+		query,
+		page: parseInt(String(page)),
+		limit: parseInt(String(limit)),
+		sort: { created_at: 'desc' },
+	};
+
+	try {
+		const projectsSorted = await Project.paginate(options);
+		res.status(200).send({
+			success: true,
+			msg: 'Data retrieved successfully',
+			data: projectsSorted,
+		});
+	} catch (error) {
+		res
+			.status(400)
+			.send({ success: false, msg: 'Error al obtener los ejercicios' });
+	}
+}

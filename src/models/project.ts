@@ -1,12 +1,13 @@
 import { Schema, model } from 'mongoose';
-import mongoosePaginate from 'mongoose-paginate';
+import { mongoosePagination, type Pagination } from 'mongoose-paginate-ts';
 
 import { type IProject } from '../types/IProject';
 
-const ProjectSchema = new Schema({
+const ProjectSchema = new Schema<IProject>({
 	title: String,
 	miniature: String,
 	content: String,
+	stack: Array,
 	path: {
 		type: String,
 		unique: true,
@@ -14,8 +15,8 @@ const ProjectSchema = new Schema({
 	created_at: Date,
 });
 
-ProjectSchema.plugin(mongoosePaginate);
+ProjectSchema.plugin(mongoosePagination);
 
-const Project = model<IProject>('Project', ProjectSchema);
+const Project = model<IProject, Pagination<IProject>>('Project', ProjectSchema);
 
 export default Project;
